@@ -13,3 +13,4 @@
       -t, --touchPlist=VALUE      The path to an iOS plist file to update with
                                   version information.
 
+Copied from: https://github.com/soltechinc/soltechxf/tree/master/UpdateVersionInfo
