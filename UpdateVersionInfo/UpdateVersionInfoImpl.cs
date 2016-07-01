@@ -10,8 +10,8 @@ namespace UpdateVersionInfo
 {
     internal class UpdateVersionInfoImpl
     {
-        static String AssemblyVersionExpression = @"^\s*\[assembly:\s*(?<attribute>(?:System\.)?(?:Reflection\.)?AssemblyVersion(?:Attribute)?\s*\(\s*""(?<version>[^""]+)""\s*\)\s*)\s*\]\s*$";
-        static String AssemblyFileVersionExpression = @"^\s*\[assembly:\s*(?<attribute>(?:System\.)?(?:Reflection\.)?AssemblyFileVersion(?:Attribute)?\s*\(\s*""(?<version>[^""]+)""\s*\)\s*)\s*\]\s*$";
+        static string AssemblyVersionExpression = @"^\s*\[assembly:\s*(?<attribute>(?:System\.)?(?:Reflection\.)?AssemblyVersion(?:Attribute)?\s*\(\s*""(?<version>[^""]+)""\s*\)\s*)\s*\]\s*$";
+        static string AssemblyFileVersionExpression = @"^\s*\[assembly:\s*(?<attribute>(?:System\.)?(?:Reflection\.)?AssemblyFileVersion(?:Attribute)?\s*\(\s*""(?<version>[^""]+)""\s*\)\s*)\s*\]\s*$";
 
         static readonly Regex assemblyVersionRegEx = new Regex(AssemblyVersionExpression, RegexOptions.Multiline | RegexOptions.Compiled);
         static readonly Regex assemblyFileVersionRegEx = new Regex(AssemblyFileVersionExpression, RegexOptions.Multiline | RegexOptions.Compiled);
@@ -48,15 +48,15 @@ namespace UpdateVersionInfo
                     build,
                     revision);
 
-                if (!String.IsNullOrEmpty(versionCsPath))
+                if (!string.IsNullOrEmpty(versionCsPath))
                 {
                     UpdateCSVersionInfo(versionCsPath, version);
                 }
-                if (!String.IsNullOrEmpty(androidManifestPath))
+                if (!string.IsNullOrEmpty(androidManifestPath))
                 {
                     UpdateAndroidVersionInfo(androidManifestPath, version);
                 }
-                if (!String.IsNullOrEmpty(touchPListPath))
+                if (!string.IsNullOrEmpty(touchPListPath))
                 {
                     UpdateTouchVersionInfo(touchPListPath, version);
                 }
@@ -68,7 +68,7 @@ namespace UpdateVersionInfo
         }
         private static void UpdateCSVersionInfo(string path, Version version)
         {
-            String contents;
+            string contents;
             using (var reader = new StreamReader(path))
             {
                 contents = reader.ReadToEnd();
@@ -98,20 +98,24 @@ namespace UpdateVersionInfo
         private static void UpdateTouchVersionInfo(string path, Version version)
         {
             XDocument doc = XDocument.Load(path);
-            var shortVersionElement = doc.XPathSelectElement("plist/dict/key[string()='CFBundleShortVersionString']");
-            var versionElement = shortVersionElement.NextNode as XElement;
-            versionElement.Value = version.ToString();
+
+            var shortVersionElement = doc.XPathSelectElement("plist/dict/key[string()='CFBundleShortVersionString']").NextNode as XElement;
+            shortVersionElement.Value = version.Major + "." + version.Minor + "." + version.Build;
+
+            var bundleVersionElement = doc.XPathSelectElement("plist/dict/key[string()='CFBundleVersion']").NextNode as XElement;
+            bundleVersionElement.Value = version.Build + "." + version.Revision;
+
             doc.Save(path);
         }
 
-        private static bool IsValidCSharpVersionFile(String path)
+        private static bool IsValidCSharpVersionFile(string path)
         {
             if (!File.Exists(path)) return false;
             if ((new FileInfo(path).Attributes & FileAttributes.ReadOnly) == FileAttributes.ReadOnly) return false;
 
             try
             {
-                String contents;
+                string contents;
                 using (var reader = new StreamReader(path))
                 {
                     contents = reader.ReadToEnd();
@@ -130,7 +134,7 @@ namespace UpdateVersionInfo
             return false;
         }
 
-        private static bool IsValidAndroidManifest(String path)
+        private static bool IsValidAndroidManifest(string path)
         {
             if (!File.Exists(path)) return false;
             if ((new FileInfo(path).Attributes & FileAttributes.ReadOnly) == FileAttributes.ReadOnly) return false;
@@ -149,7 +153,7 @@ namespace UpdateVersionInfo
             return false;
         }
 
-        private static bool IsValidTouchPList(String path)
+        private static bool IsValidTouchPList(string path)
         {
             if (!File.Exists(path)) return false;
             if ((new FileInfo(path).Attributes & FileAttributes.ReadOnly) == FileAttributes.ReadOnly) return false;
